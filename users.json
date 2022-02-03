@@ -1,0 +1,16 @@
+[
+    {
+        "email": "test@gmail.com",
+        "password": "$2b$10$EqpK1E.jInB4XIuIAEWWKuH8H/t1G3Pw4sCxXYwovVbeQMx33MLJa",
+        "address": "test123",
+        "name": "Zilong",
+        "id": "3d7ffb17-108c-4082-9230-080e55b171fd"
+    },
+    {
+        "email": "test1981@mail.com",
+        "password": "$2b$10$hd8dRYDYhIscHHTLFeOOx.uLEUr/YfWxfR6rzG74RH1inFbmwTboS",
+        "address": "test123",
+        "name": "Zilong",
+        "id": "e42e1abd-2dc3-483f-9c95-660cdd314e7f"
+    }
+]

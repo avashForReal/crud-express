@@ -1,0 +1,2 @@
+create user - post /user
+get user - get /user/:id
