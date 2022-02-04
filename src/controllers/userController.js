@@ -134,24 +134,46 @@ const updateUser = async (req, res) => {
             // find the data index
             const dataIndex = data.findIndex(userData => userData.id == req.params.id);
 
-            const requestObject = req.body
+            const { email, password, name, address} = req.body
 
-            if ("password" in requestObject) {
-                const encryptedPassword = await hashPassword(requestObject.password)
-                data[dataIndex].password = encryptedPassword
+            // extract only the keys with values
+            const requestObject = {
+                email,
+                password,
+                name,
+                address
             }
 
-            if("email" in requestObject ){
-                data[dataIndex].email = requestObject.email
+            // hash the password if exists
+            if(password){
+                requestObject.password = await hashPassword(requestObject.password)
             }
 
-            if("address" in requestObject){
-                data[dataIndex].address = requestObject.address
+            // loop through the object
+            for(keys in requestObject){
+                // check if the data exists
+                if(requestObject[keys]){
+                    // update the data
+                    data[dataIndex][keys] = requestObject[keys]
+                }
             }
 
-            if("name" in requestObject){
-                data[dataIndex].name = requestObject.name
-            }
+            // if ("password" in requestObject) {
+            //     const encryptedPassword = await hashPassword(requestObject.password)
+            //     data[dataIndex].password = encryptedPassword
+            // }
+
+            // if("email" in requestObject ){
+            //     data[dataIndex].email = requestObject.email
+            // }
+
+            // if("address" in requestObject){
+            //     data[dataIndex].address = requestObject.address
+            // }
+
+            // if("name" in requestObject){
+            //     data[dataIndex].name = requestObject.name
+            // }
 
             // write the new data
             await writeFile(data)
