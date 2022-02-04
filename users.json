@@ -5,5 +5,12 @@
         "address": "biratnagar",
         "name": "Zilong",
         "id": "e42e1abd-2dc3-483f-9c95-660cdd314e7f"
+    },
+    {
+        "email": "test123@gmail.com",
+        "password": "$2b$10$htlaG9J9epWviByAuc.wU.3rtMnbe1WyjWI4LvA3bUZSDP8QX/7fi",
+        "name": "Avash Ghimire",
+        "address": "dharan",
+        "id": "b1159e9c-fc02-4e9d-8827-644a69028eff"
     }
 ]

@@ -1,6 +1,6 @@
-const readFile = require("../helpers/readFile")
-const writeFile = require("../helpers/writeFile")
 const hashPassword = require("../helpers/hashPassword")
+
+const userModels = require("../models/userModels")
 
 // uuidv4
 const { v4 } = require('uuid');
@@ -9,13 +9,10 @@ const { v4 } = require('uuid');
 const getUsers = async (_, res) => {
 
     try {
-        // read file
-        const data = await readFile();
+        // get all data
+        const data = await userModels.getAll()
 
-        // remove password before sending the data
-        const cleanData = data.map(({ password, ...rest }) => rest)
-
-        res.status(200).json({ message: "success", data: cleanData })
+        res.status(200).json({ message: "success", data })
     } catch (e) {
         console.log(e)
         res.status(500).json({ error: "internal server error" })
@@ -42,14 +39,8 @@ const createUser = async (req, res) => {
             id
         }
 
-        // get all data file
-        const userData = await readFile();
-
-        // append data to the file
-        userData.push(data)
-
-        // write the file
-        await writeFile(userData)
+        // insert the data
+        await userModels.insertOne(data)
 
         res.status(200).json({ message: "successfully created a new user" })
     } catch (e) {
@@ -58,25 +49,24 @@ const createUser = async (req, res) => {
     }
 }
 
-// get user detail based on user id
+// get user detail based on user id from params
 const getUser = async (req, res) => {
     try {
-        // read the json data
-        const data = await readFile();
+        //destructure the id
+        const { id } = req.params
 
-        // get user for the given id
-        const user = data.find(user => {
-            return user.id == req.params.id
-        })
+        // find user by id
+        const user = await userModels.findOneById(id);
 
-        // check if the user exists
-        if (user) {
-            // delete password before sending the data
-            delete user.password
-            res.status(200).json({ message: "success", data: user })
-        } else {
+        // check if the user doesn't exists
+        if (!user) {
             res.status(409).json({ message: "user not found" })
         }
+
+        // delete password before sending the data
+        delete user.password
+        // send response
+        res.status(200).json({ message: "success", data: user })
 
     } catch (e) {
         console.log(e)
@@ -89,28 +79,22 @@ const getUser = async (req, res) => {
 // delete an existing user
 const deleteUser = async (req, res) => {
     try {
-        // get data
-        const data = await readFile();
-        // find user from param id
-        const user = data.find(user => {
-            return user.id == req.params.id
-        })
+        // destructure id
+        const { id } = req.params
 
-        // check if user exists
-        if (user) {
-            // data without the user with given id
-            const userData = data.filter(user => {
-                return user.id !== req.params.id
-            })
+        // get user by id
+        const dbResponse = await userModels.deleteOneById(id)
 
-            // write the new data
-            await writeFile(userData)
+        console.log(dbResponse.status);
 
-            res.status(200).json({ message: "deleted the user" })
-
-        } else {
-            res.status(409).json({ message: "user not found" })
+        // check response: boolean 
+        if (!dbResponse.status) {
+            console.log("running");
+            return res.status(409).json({ message: dbResponse.message })
         }
+
+        console.log("running outside");
+        res.status(200).json({ message: dbResponse.message })
 
     } catch (e) {
         console.log(e)
@@ -121,69 +105,34 @@ const deleteUser = async (req, res) => {
 // update user
 const updateUser = async (req, res) => {
     try {
-        // get data
-        const data = await readFile();
+        // destructure id from params
+        const { id } = req.params
 
-        // find user from param id
-        const user = data.find(user => {
-            return user.id == req.params.id
-        })
+        // destructure request body
+        const { email, password, name, address } = req.body
 
-        // check if user exists
-        if (user) {
-            // find the data index
-            const dataIndex = data.findIndex(userData => userData.id == req.params.id);
-
-            const { email, password, name, address} = req.body
-
-            // extract only the keys with values
-            const requestObject = {
-                email,
-                password,
-                name,
-                address
-            }
-
-            // hash the password if exists
-            if(password){
-                requestObject.password = await hashPassword(requestObject.password)
-            }
-
-            // loop through the object
-            for(keys in requestObject){
-                // check if the data exists
-                if(requestObject[keys]){
-                    // update the data
-                    data[dataIndex][keys] = requestObject[keys]
-                }
-            }
-
-            // if ("password" in requestObject) {
-            //     const encryptedPassword = await hashPassword(requestObject.password)
-            //     data[dataIndex].password = encryptedPassword
-            // }
-
-            // if("email" in requestObject ){
-            //     data[dataIndex].email = requestObject.email
-            // }
-
-            // if("address" in requestObject){
-            //     data[dataIndex].address = requestObject.address
-            // }
-
-            // if("name" in requestObject){
-            //     data[dataIndex].name = requestObject.name
-            // }
-
-            // write the new data
-            await writeFile(data)
-
-            res.status(200).json({ message: "user updated" })
-
-        } else {
-            res.status(409).json({ message: "user not found" })
+        // extract only the keys with values
+        const requestObject = {
+            email,
+            password,
+            name,
+            address
         }
 
+        // hash the password if exists
+        if (password) {
+            requestObject.password = await hashPassword(requestObject.password)
+        }
+
+        // await result: updateOneById: (id<required>, data-to-update<required>)
+        const user = await userModels.updateOneById(id, requestObject)
+
+        // user doesnt exist: boolean
+        if (!user.status) {
+           return res.status(409).json({ message: user.message })
+        }
+
+        res.status(200).json({ message: "user updated", data: user.data })
     } catch (e) {
         console.log(e)
         res.status(500).json({ error: "internal server error" })
