@@ -26,8 +26,8 @@ router.route('/')
     .post(newUserValidationRules(), validate, checkExistingEmail, createUser) //add a new user
 
 router.route('/:id')
-    .get(getUser)
-    .delete(deleteUser)
-    .patch(updateUserValidationRules(), validate, checkExistingEmail, updateUser)
+    .get(getUser) // get all users
+    .delete(deleteUser) //delete a user
+    .patch(updateUserValidationRules(), validate, checkExistingEmail, updateUser) //update a user
 
 module.exports = router
