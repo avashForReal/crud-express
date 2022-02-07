@@ -19,9 +19,6 @@ const checkExistingEmail = async (req,res,next) => {
         console.log(e);
         throw new Error("An error occured")
     }
-
- 
-
 }
 
 module.exports = {checkExistingEmail}

@@ -2,7 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 
 // fs import
-const userRoutes = require("./src/routes/userRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 // env config
 dotenv.config();
